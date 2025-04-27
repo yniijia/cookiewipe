@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CookieWipe</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="cookie-container">
+        <div id="cookie" class="cookie">
+          <img src="images/popup_cookie.png" alt="Cookie" class="cookie-img">
+        </div>
+      </div>
+      <h1>CookieWipe</h1>
+    </div>
+    
+    <div class="content">
+      <div class="options-section">
+        <h2 class="section-title">Clear Browser Data</h2>
+        <div class="options">
+          <label class="option"><input type="checkbox" id="clearCookies" checked> Cookies</label>
+          <label class="option"><input type="checkbox" id="clearCache"> Cache</label>
+          <label class="option"><input type="checkbox" id="clearHistory"> History</label>
+          <label class="option"><input type="checkbox" id="flushDNS"> DNS Cache</label>
+        </div>
+        <button id="clearButton" class="clear-button">Clear Selected Items</button>
+      </div>
+      
+      <div class="status-section">
+        <p id="message" class="message">Clearing cookies for this website...</p>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div class="tagline">One click, zero crumbs.</div>
+      <div class="version-info">v2.02.25 by Tony Fiston</div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 
