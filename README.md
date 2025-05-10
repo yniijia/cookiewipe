@@ -51,6 +51,10 @@ The UI design embraces a clean, minimal aesthetic with a focus on:
 
 ## 👏 Credits
 
+Originally created by [Tony Fiston](https://github.com/yniijia).
+
 Designed and developed with a focus on clean, minimal UI/UX principles that promote digital wellbeing.
+
+*"One click, zero crumbs."* 🍪
 
 Version 2.02.25 💙
