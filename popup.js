@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-  const cookieElement = document.getElementById('cookie');
+  const cookieContainer = document.getElementById('cookie');
   const messageElement = document.getElementById('message');
   const clearButton = document.getElementById('clearButton');
   const clearCookiesCheckbox = document.getElementById('clearCookies');
@@ -11,63 +11,32 @@ document.addEventListener('DOMContentLoaded', function() {
   setupOptionsUI();
   
   // Automatically clear cookies when popup opens
-  cookieElement.classList.add('crumble');
-  clearCookiesForCurrentSite(function(result) {
-    showCookieResults(result);
-  });
+  cookieContainer.classList.add('crumble');
+  
+  // Small delay before clearing cookies for animation to be noticeable
+  setTimeout(() => {
+    clearCookiesForCurrentSite(function(result) {
+      showCookieResults(result);
+    });
+  }, 300);
   
   // Setup options interaction
   function setupOptionsUI() {
-    // Get all option elements
-    const optionElements = document.querySelectorAll('.option');
+    // Handle checkbox changes
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     
-    // Add click handler for each option
-    optionElements.forEach(option => {
-      const checkbox = option.querySelector('input[type="checkbox"]');
-      
-      // Add selected class to cookie option by default
-      if (checkbox.id === 'clearCookies' && checkbox.checked) {
-        option.classList.add('selected');
-      }
-      
-      // Handle click on the option label
-      option.addEventListener('click', function(e) {
-        // Prevent immediate propagation for better UX
-        if (e.target !== checkbox) {
-          e.preventDefault();
-          checkbox.checked = !checkbox.checked;
-        }
-        
-        // Toggle selected class
-        if (checkbox.checked) {
-          option.classList.add('selected');
-        } else {
-          option.classList.remove('selected');
-        }
-        
-        // Update clear button text based on selections
-        updateClearButtonText();
-      });
-      
-      // Also handle direct checkbox changes
+    checkboxes.forEach(checkbox => {
       checkbox.addEventListener('change', function() {
-        if (this.checked) {
-          option.classList.add('selected');
-        } else {
-          option.classList.remove('selected');
-        }
-        
-        // Update clear button text
-        updateClearButtonText();
+        updateClearButtonState();
       });
     });
     
-    // Initial button text update
-    updateClearButtonText();
+    // Initial button state update
+    updateClearButtonState();
   }
   
-  // Update the clear button text based on selected options
-  function updateClearButtonText() {
+  // Update the clear button text and state based on selected options
+  function updateClearButtonState() {
     const selectedOptions = [];
     
     if (clearCookiesCheckbox.checked) selectedOptions.push('Cookies');
@@ -75,12 +44,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (clearHistoryCheckbox.checked) selectedOptions.push('History');
     if (flushDNSCheckbox.checked) selectedOptions.push('DNS');
     
+    const buttonTextElement = clearButton.querySelector('.button-text');
+    
     if (selectedOptions.length === 0) {
-      clearButton.textContent = 'Select Items to Clear';
+      buttonTextElement.textContent = 'Select Items to Clear';
       clearButton.disabled = true;
       clearButton.classList.add('disabled');
+    } else if (selectedOptions.length === 1) {
+      buttonTextElement.textContent = `Clear ${selectedOptions[0]}`;
+      clearButton.disabled = false;
+      clearButton.classList.remove('disabled');
+    } else if (selectedOptions.length === 4) {
+      buttonTextElement.textContent = 'Clear All Data';
+      clearButton.disabled = false;
+      clearButton.classList.remove('disabled');
     } else {
-      clearButton.textContent = `Clear ${selectedOptions.join(', ')}`;
+      buttonTextElement.textContent = `Clear Selected (${selectedOptions.length})`;
       clearButton.disabled = false;
       clearButton.classList.remove('disabled');
     }
@@ -155,8 +134,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function checkCompletion() {
       operationsCompleted++;
       if (operationsCompleted === operationsTotal) {
-        showResults(operationResults);
-        clearButton.classList.remove('clearing');
+        // Add a small delay for UX
+        setTimeout(() => {
+          showResults(operationResults);
+          clearButton.classList.remove('clearing');
+          
+          // Add success animation
+          cookieContainer.classList.remove('crumble');
+          void cookieContainer.offsetWidth; // Force reflow
+          cookieContainer.classList.add('crumble');
+        }, 500);
       }
     }
   });
@@ -165,9 +152,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function showCookieResults(result) {
     if (result.success) {
       if (result.count > 0) {
-        showSuccess(`Cleared ${result.count} cookie${result.count !== 1 ? 's' : ''} for ${result.domain}.`);
+        showSuccess(`Cleared ${result.count} cookie${result.count !== 1 ? 's' : ''} for ${result.domain}`);
       } else {
-        showMessage(`No cookies found for ${result.domain}.`);
+        showMessage(`No cookies found for ${result.domain}`);
       }
     } else {
       showError(result.message);
@@ -198,20 +185,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Remove each cookie
         cookies.forEach(cookie => {
-          // Create URL for cookie removal (needs to match cookie's protocol and domain)
-          const cookieUrl = (cookie.secure ? "https://" : "http://") + 
-                           cookie.domain + 
-                           (cookie.path || "/");
+          const protocol = cookie.secure ? "https:" : "http:";
+          const cookieUrl = `${protocol}//${cookie.domain}${cookie.path}`;
           
           chrome.cookies.remove({
             url: cookieUrl,
             name: cookie.name
-          }, function(details) {
+          }, function() {
             cookiesRemoved++;
-            
-            // When all cookies are processed, return result
             if (cookiesRemoved === totalCookies) {
-              callback({type: "cookies", success: true, count: totalCookies, domain: domain});
+              callback({
+                type: "cookies",
+                success: true,
+                count: totalCookies,
+                domain: domain
+              });
             }
           });
         });
@@ -220,47 +208,25 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function clearBrowsingCache(callback) {
-    chrome.browsingData.removeCache(
-      { since: 0 }, // Clear all cache
-      function() {
-        callback({type: "cache", success: true});
-      }
-    );
-  }
-  
-  function clearBrowsingHistory(callback) {
-    // Get the active tab
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      if (tabs.length === 0) {
-        callback({type: "history", success: false, message: "No active tab found"});
-        return;
-      }
-      
-      // Use browsingData API for more thorough history removal
-      // This clears all history, not just for specific domain
-      chrome.browsingData.remove({
-        "since": 0 // Remove all history
-      }, {
-        "history": true,
-        "downloads": false,
-        "cookies": false,
-        "cache": false,
-        "passwords": false,
-        "formData": false
-      }, function() {
-        callback({type: "history", success: true, message: "All browsing history cleared"});
+    chrome.browsingData.removeCache({
+      "since": 0
+    }, function() {
+      callback({
+        type: "cache",
+        success: true,
+        message: "Browser cache cleared"
       });
     });
   }
   
-  function flushDNSCache(callback) {
-    // Chrome doesn't have a direct API for DNS cache flushing
-    // We'll implement a workaround by sending network requests to force DNS resolution
-    
-    // Get the active tab
+  function clearBrowsingHistory(callback) {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       if (tabs.length === 0) {
-        callback({type: "dns", success: false, message: "No active tab found"});
+        callback({
+          type: "history",
+          success: false,
+          message: "No active tab found"
+        });
         return;
       }
       
@@ -268,107 +234,102 @@ document.addEventListener('DOMContentLoaded', function() {
       const url = new URL(activeTab.url);
       const domain = url.hostname;
       
-      // To flush DNS cache, we'll make HEAD requests to force DNS resolution
-      const domainsToResolve = [
-        domain,                   // Current domain
-        'www.google.com',         // Common domains to force refresh
-        'www.facebook.com',
-        'www.youtube.com',
-        'www.amazon.com',
-        'www.wikipedia.org'
-      ];
-      
-      let resolvedCount = 0;
-      
-      // Try to resolve each domain by making a HEAD request
-      domainsToResolve.forEach(domain => {
-        // Create a hidden iframe to force DNS resolution
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = 'https://' + domain + '/favicon.ico?' + new Date().getTime();
+      chrome.history.search({
+        text: domain,
+        startTime: 0
+      }, function(historyItems) {
+        if (historyItems.length === 0) {
+          callback({
+            type: "history",
+            success: true,
+            count: 0,
+            domain: domain
+          });
+          return;
+        }
         
-        // Handle the load event
-        iframe.onload = function() {
-          // Remove the iframe when loaded
-          document.body.removeChild(iframe);
-          resolvedCount++;
-          
-          // When all domains are processed, return result
-          if (resolvedCount === domainsToResolve.length) {
-            callback({type: "dns", success: true, message: "DNS cache flushed"});
-          }
-        };
+        let itemsRemoved = 0;
+        const totalItems = historyItems.length;
         
-        // Handle errors
-        iframe.onerror = function() {
-          // Remove the iframe on error
-          document.body.removeChild(iframe);
-          resolvedCount++;
-          
-          // Continue even if some fail
-          if (resolvedCount === domainsToResolve.length) {
-            callback({type: "dns", success: true, message: "DNS cache flushed"});
-          }
-        };
-        
-        // Add the iframe to the document
-        document.body.appendChild(iframe);
+        historyItems.forEach(item => {
+          chrome.history.deleteUrl({url: item.url}, function() {
+            itemsRemoved++;
+            if (itemsRemoved === totalItems) {
+              callback({
+                type: "history",
+                success: true,
+                count: totalItems,
+                domain: domain
+              });
+            }
+          });
+        });
       });
     });
   }
   
+  function flushDNSCache(callback) {
+    chrome.browsingData.remove({
+      "since": 0
+    }, {
+      "cacheStorage": true,
+      "fileSystems": true,
+      "indexedDB": true,
+      "localStorage": false,
+      "serviceWorkers": true,
+      "webSQL": true
+    }, function() {
+      callback({
+        type: "dns",
+        success: true,
+        message: "DNS cache flushed"
+      });
+    });
+  }
+  
+  // Show results after manual clearing
   function showResults(results) {
-    let message = "";
     let successCount = 0;
+    let itemsCleared = 0;
+    let errorMessage = '';
     
     results.forEach(result => {
       if (result.success) {
         successCount++;
-        
-        if (result.type === "cookies") {
-          if (result.count > 0) {
-            message += `Cleared ${result.count} cookie${result.count !== 1 ? 's' : ''} for ${result.domain}.<br>`;
-          } else {
-            message += `No cookies found for ${result.domain}.<br>`;
-          }
-        } else if (result.type === "cache") {
-          message += "Browser cache cleared.<br>";
-        } else if (result.type === "history") {
-          if (result.message) {
-            message += `${result.message}<br>`;
-          } else if (result.count > 0) {
-            message += `Cleared ${result.count} history item${result.count !== 1 ? 's' : ''} for ${result.domain}.<br>`;
-          } else {
-            message += `No history found for ${result.domain}.<br>`;
-          }
-        } else if (result.type === "dns") {
-          message += `${result.message}<br>`;
+        if (result.count) {
+          itemsCleared += result.count;
         }
       } else {
-        message += `Error clearing ${result.type}: ${result.message}<br>`;
+        errorMessage = result.message;
       }
     });
     
     if (successCount === results.length) {
-      messageElement.innerHTML = message;
-      messageElement.classList.add('success');
+      if (itemsCleared > 0) {
+        showSuccess(`Successfully cleared ${itemsCleared} item${itemsCleared !== 1 ? 's' : ''}`);
+      } else {
+        showMessage('No items found to clear');
+      }
     } else {
-      messageElement.innerHTML = message;
+      showError(errorMessage || 'Error clearing some items');
     }
   }
   
+  // Display a neutral message
   function showMessage(msg) {
-    messageElement.innerHTML = msg;
-    messageElement.classList.remove('success');
+    messageElement.textContent = msg;
+    messageElement.className = 'message';
   }
   
+  // Display an error message
   function showError(msg) {
-    messageElement.innerHTML = "Error: " + msg;
-    messageElement.style.color = "red";
+    messageElement.textContent = msg;
+    messageElement.className = 'message error';
   }
   
+  // Display a success message
   function showSuccess(msg) {
-    messageElement.innerHTML = msg;
-    messageElement.classList.add('success');
+    messageElement.textContent = msg;
+    messageElement.className = 'message success';
   }
-}); 
+});

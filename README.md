@@ -1,71 +1,56 @@
-# CookieWipe Chrome Extension v2.02.25
+# 🍪 CookieWipe Chrome Extension
 
-*Instantly clear cookies, cache, history, and DNS cache from the current webpage with one click*
+<div align="center">
+  <img src="images/icon128.png" alt="CookieWipe Logo" width="128" height="128">
+</div>
 
-## What CookieWipe Does
+CookieWipe is a simple yet powerful Chrome extension that allows users to instantly clear cookies, cache, browsing history, and DNS cache with just one click, enhancing privacy and browsing experience. ✨
 
-CookieWipe helps users quickly remove browser data from the webpage they're currently viewing. With a single click on the extension icon, cookies are instantly cleared for the current site. Additionally, users can choose to clear browser cache, history, and DNS cache through the extension's intuitive interface.
+## ✅ Features
 
-## Features
+- **🔄 Single-Click Cookie Clearing**: Automatically clears cookies for the current site upon opening
+- **🧹 Multiple Data Management Options**: Clear cookies, cache, browsing history, and DNS cache
+- **🎨 Beautiful, Minimal UI**: Premium design with smooth animations
+- **👁️ Visual Feedback**: Clear success/error states with visual indicators
+- **📱 Responsive Design**: Optimized for different screen sizes and orientations
+- **♿ Accessibility Support**: Designed with WCAG guidelines in mind
 
-- **One-click cookie clearing**: Just click the extension icon and cookies are instantly cleared for the current site.
-- **Advanced data clearing options**: Optionally clear browser cache, browsing history, and DNS cache.
-- **Visual confirmation**: Clear success messages showing what was cleaned and how many items were removed.
-- **Animated cookie icon**: A friendly cookie that crumbles when data is cleared.
-- **Elegant blue design**: Clean, modern interface with a beautiful blue color scheme.
-- **Responsive UI**: Interactive checkboxes with visual feedback and dynamic button text.
+## 💫 Design Philosophy
 
-## Installation
+The UI design embraces a clean, minimal aesthetic with a focus on:
 
-### From Chrome Web Store (Coming Soon)
-1. Visit the Chrome Web Store page for CookieWipe
-2. Click "Add to Chrome"
-3. Confirm the installation
+- **✨ Simplicity**: Distraction-free interface that focuses on core functionality
+- **🌈 Calming Colors**: Soft blue palette that creates a sense of peace and clarity
+- **🎭 Smooth Animations**: Subtle motion design that enhances the user experience
+- **🧠 Intuitive Interactions**: Clear, consistent UI patterns that users understand immediately
+- **👓 Accessibility**: High contrast text and interactive elements that work for all users
 
-### Manual Installation (Developer Mode)
+## 📥 Installation
+
 1. Download or clone this repository
 2. Open Chrome and navigate to `chrome://extensions/`
 3. Enable "Developer mode" (toggle in the top-right corner)
-4. Click "Load unpacked" and select the CookieWipe folder
-5. The extension should now appear in your Chrome toolbar
+4. Click "Load unpacked" and select the extension directory
+5. The CookieWipe extension icon should now appear in your browser toolbar! 🎉
 
-## How to Use
+## 🚀 Usage
 
-1. **Basic Usage:**
-   - Click the CookieWipe extension icon in your browser toolbar
-   - Cookies for the current website will be instantly cleared
-   - You'll see a confirmation message showing how many cookies were removed
+1. Click the CookieWipe icon in your browser toolbar to open the popup
+2. Cookies for the current site will be automatically cleared 🍪✨
+3. Select additional data types to clear (Cache, History, DNS Cache)
+4. Click the "Clear Selected" button to remove the selected data types
+5. View the status message for confirmation of successful clearing
 
-2. **Advanced Options:**
-   - Click the CookieWipe extension icon
-   - Select which data types you want to clear (Cookies, Cache, History, DNS Cache)
-   - Click the "Clear Selected Items" button
-   - You'll see confirmation messages for each data type that was cleared
+## 🔮 Future Enhancements
 
-## Privacy
+- 🌗 Dark mode support (already included in CSS via media queries)
+- 🔒 Site exclusion list for trusted websites
+- ⏰ Scheduled automatic clearing
+- 📊 Detailed statistics about cleared data
+- 🎨 Custom animation themes
 
-CookieWipe operates entirely on your local machine. It:
-- Does NOT collect any user data
-- Does NOT send any information to external servers
-- Does NOT require any special permissions beyond what's needed to clear browser data
+## 👏 Credits
 
-## Development
+Designed and developed with a focus on clean, minimal UI/UX principles that promote digital wellbeing.
 
-### Project Structure
-- `manifest.json`: Extension configuration
-- `popup.html`: The extension popup UI
-- `popup.js`: JavaScript for functionality
-- `styles.css`: Styling for the popup
-- `images/`: Icon files and UI elements
-  - `icon16.png`, `icon48.png`, `icon128.png`: Extension icons
-  - `popup_cookie.png`: Custom cookie image for the popup
-
-## License
-
-MIT License
-
-## Credits
-
-Created by Tony Fiston
-
-*"One click, zero crumbs."* 
+Version 2.02.25 💙

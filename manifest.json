@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "CookieWipe",
-  "version": "1.0.0",
-  "description": "Instantly clear cookies from the current webpage with one click",
+  "version": "2.02.25",
+  "description": "Clear your digital footprint with one click - premium cookie and cache management",
   "permissions": ["cookies", "tabs", "activeTab", "browsingData", "history"],
   "host_permissions": ["<all_urls>"],
   "action": {
@@ -18,4 +18,4 @@
     "48": "images/icon48.png",
     "128": "images/icon128.png"
   }
-} 
+}
