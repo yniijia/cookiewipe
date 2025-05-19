@@ -209,81 +209,40 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function clearBrowsingCache(callback) {
     chrome.browsingData.removeCache({
-      "since": 0
+      "since": 0 // Clear all cached data from the beginning of time
     }, function() {
       callback({
         type: "cache",
         success: true,
-        message: "Browser cache cleared"
+        message: "Browser cache cleared successfully"
       });
     });
   }
   
   function clearBrowsingHistory(callback) {
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      if (tabs.length === 0) {
-        callback({
-          type: "history",
-          success: false,
-          message: "No active tab found"
-        });
-        return;
-      }
-      
-      const activeTab = tabs[0];
-      const url = new URL(activeTab.url);
-      const domain = url.hostname;
-      
-      chrome.history.search({
-        text: domain,
-        startTime: 0
-      }, function(historyItems) {
-        if (historyItems.length === 0) {
-          callback({
-            type: "history",
-            success: true,
-            count: 0,
-            domain: domain
-          });
-          return;
-        }
-        
-        let itemsRemoved = 0;
-        const totalItems = historyItems.length;
-        
-        historyItems.forEach(item => {
-          chrome.history.deleteUrl({url: item.url}, function() {
-            itemsRemoved++;
-            if (itemsRemoved === totalItems) {
-              callback({
-                type: "history",
-                success: true,
-                count: totalItems,
-                domain: domain
-              });
-            }
-          });
-        });
+    // Clears all browsing history
+    chrome.browsingData.removeHistory({
+      "since": 0 // Clear all history from the beginning of time
+    }, function() {
+      callback({
+        type: "history",
+        success: true,
+        message: "Browsing history cleared successfully"
       });
     });
   }
   
   function flushDNSCache(callback) {
-    chrome.browsingData.remove({
-      "since": 0
-    }, {
-      "cacheStorage": true,
-      "fileSystems": true,
-      "indexedDB": true,
-      "localStorage": false,
-      "serviceWorkers": true,
-      "webSQL": true
-    }, function() {
-      callback({
-        type: "dns",
-        success: true,
-        message: "DNS cache flushed"
-      });
+    // Chrome extensions cannot directly flush the OS or browser's internal DNS resolver cache.
+    // This function will inform the user of this limitation.
+    // Optionally, it could clear general browser cache again, as that *might* affect some network-level caches.
+    // For now, just sending a message.
+    chrome.browsingData.removeCache({ "since": 0 }, function() { // Added standard cache clear as a fallback
+        callback({
+            type: "dns",
+            success: true, // Reporting success for the attempted operation (cache clearing)
+            message: "Browser cache cleared. Direct DNS flush is not possible via extensions."
+        });
     });
   }
   
@@ -332,4 +291,4 @@ document.addEventListener('DOMContentLoaded', function() {
     messageElement.textContent = msg;
     messageElement.className = 'message success';
   }
-});
+}); 

@@ -1,3 +1,4 @@
+
 :root {
   --primary: #5A6FE1; /* Mindful blue */
   --primary-light: #E0E4F7;
@@ -248,7 +249,6 @@ h1 {
   visibility: hidden;
   transition: var(--transition);
 }
-
 .action-button.clearing .button-loader {
   opacity: 1;
   visibility: visible;
@@ -256,83 +256,89 @@ h1 {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Status message styles */
 .status-card {
-  min-height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
   padding: 16px;
 }
 
 .message {
   font-size: 14px;
   color: var(--text-secondary);
-  text-align: center;
-  margin: 0;
   transition: var(--transition);
 }
 
 .message.success {
   color: var(--success);
-  background-color: var(--success-light);
-  padding: 12px 16px;
-  border-radius: 8px;
+  font-weight: 500;
 }
 
 .message.error {
   color: var(--error);
-  background-color: var(--error-light);
-  padding: 12px 16px;
-  border-radius: 8px;
+  font-weight: 500;
 }
 
 /* Footer styles */
 .footer {
-  margin-top: 20px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: 24px;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: 4px;
 }
 
 .tagline {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-tertiary);
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .version-info {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-tertiary);
-  opacity: 0.8;
+  background-color: var(--primary-lighter);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-/* Focus styles for accessibility */
 button:focus, input:focus {
   outline: 2px solid var(--primary-light);
   outline-offset: 2px;
 }
 
-/* Dark mode support (if needed in the future) */
+/* Dark Mode (Optional - Basic Example) */
 @media (prefers-color-scheme: dark) {
   :root {
-    --primary: #7085F5;
-    --primary-light: #2A324E;
-    --primary-lighter: #262B3D;
-    --success: #00D7AB;
-    --success-light: #1C3A34;
-    --background: #181A25;
-    --background-alt: #21232F;
-    --text-primary: #F2F3F7;
-    --text-secondary: #C5C8D7;
-    --text-tertiary: #888DA3;
-    --border: #32364A;
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --primary: #7B8DF9;
+    --primary-light: #3A3C5C;
+    --primary-lighter: #2A2C3F;
+    --success: #1EE0B7; 
+    --success-light: #2A4A43;
+    --error: #FF7A7A;
+    --error-light: #4D3232;
+    --text-primary: #F0F2F7;
+    --text-secondary: #A8AEBF;
+    --text-tertiary: #7A8094;
+    --background: #1E1F2E;
+    --background-alt: #252738;
+    --border: #393B53;
   }
+  
+  .checkbox-custom {
+    background-color: var(--border);
+  }
+
+  .checkbox-wrapper input[type="checkbox"]:checked + label .checkbox-custom::after {
+    border-color: var(--background);
+  }
+  
+  .action-button.disabled {
+    background-color: var(--border);
+    color: var(--text-tertiary);
+  }  
 }
