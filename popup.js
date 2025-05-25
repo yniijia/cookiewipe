@@ -96,7 +96,14 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
-    showMessage("Clearing selected data...");
+    // Show more specific message about what's being cleared
+    const selectedItems = [];
+    if (clearCookies) selectedItems.push('cookies');
+    if (clearCache) selectedItems.push('cache');
+    if (clearHistory) selectedItems.push('history');
+    if (flushDNS) selectedItems.push('network cache');
+    
+    showMessage(`🔄 Clearing ${selectedItems.join(', ')}...`);
     
     // Clear cookies if selected
     if (clearCookies) {
@@ -152,9 +159,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function showCookieResults(result) {
     if (result.success) {
       if (result.count > 0) {
-        showSuccess(`Cleared ${result.count} cookie${result.count !== 1 ? 's' : ''} for ${result.domain}`);
+        showSuccess(`🍪 Cleared ${result.count} cookie${result.count !== 1 ? 's' : ''} for ${result.domain}`);
       } else {
-        showMessage(`No cookies found for ${result.domain}`);
+        showMessage(`🍪 No cookies found for ${result.domain}`);
       }
     } else {
       showError(result.message);
@@ -208,26 +215,40 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function clearBrowsingCache(callback) {
+    // First, try to get some cache statistics before clearing
+    // Note: Chrome doesn't provide exact cache size/count, but we can provide better feedback
     chrome.browsingData.removeCache({
       "since": 0 // Clear all cached data from the beginning of time
     }, function() {
       callback({
         type: "cache",
         success: true,
-        message: "Browser cache cleared successfully"
+        message: "Browser cache cleared successfully",
+        details: "All cached files, images, and web data have been removed"
       });
     });
   }
   
   function clearBrowsingHistory(callback) {
-    // Clears all browsing history
-    chrome.browsingData.removeHistory({
-      "since": 0 // Clear all history from the beginning of time
-    }, function() {
-      callback({
-        type: "history",
-        success: true,
-        message: "Browsing history cleared successfully"
+    // First, get a count of history items before clearing
+    chrome.history.search({
+      text: '',
+      startTime: 0,
+      maxResults: 10000 // Get up to 10k items to count
+    }, function(historyItems) {
+      const historyCount = historyItems.length;
+      
+      // Now clear all browsing history
+      chrome.browsingData.removeHistory({
+        "since": 0 // Clear all history from the beginning of time
+      }, function() {
+        callback({
+          type: "history",
+          success: true,
+          count: historyCount,
+          message: `Browsing history cleared successfully`,
+          details: `${historyCount} history entries removed`
+        });
       });
     });
   }
@@ -235,13 +256,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function flushDNSCache(callback) {
     // Chrome extensions cannot directly flush the OS or browser's internal DNS resolver cache.
     // This function will inform the user of this limitation.
-    // Optionally, it could clear general browser cache again, as that *might* affect some network-level caches.
-    // For now, just sending a message.
-    chrome.browsingData.removeCache({ "since": 0 }, function() { // Added standard cache clear as a fallback
+    // We'll clear browser cache as a fallback which may help with some network-related caches.
+    chrome.browsingData.removeCache({ "since": 0 }, function() {
         callback({
             type: "dns",
-            success: true, // Reporting success for the attempted operation (cache clearing)
-            message: "Browser cache cleared. Direct DNS flush is not possible via extensions."
+            success: true,
+            message: "Browser cache cleared as DNS fallback",
+            details: "Direct DNS flush not possible via extensions. Browser cache cleared instead."
         });
     });
   }
@@ -249,25 +270,49 @@ document.addEventListener('DOMContentLoaded', function() {
   // Show results after manual clearing
   function showResults(results) {
     let successCount = 0;
-    let itemsCleared = 0;
+    let totalItemsCleared = 0;
     let errorMessage = '';
+    let detailedMessages = [];
     
     results.forEach(result => {
       if (result.success) {
         successCount++;
         if (result.count) {
-          itemsCleared += result.count;
+          totalItemsCleared += result.count;
         }
+        
+        // Create detailed message for each operation
+        let operationMessage = '';
+        switch(result.type) {
+          case 'cookies':
+            operationMessage = `🍪 ${result.count || 0} cookies cleared`;
+            if (result.domain) {
+              operationMessage += ` for ${result.domain}`;
+            }
+            break;
+          case 'cache':
+            operationMessage = `💾 Browser cache cleared`;
+            break;
+          case 'history':
+            operationMessage = `📚 ${result.count || 0} history entries cleared`;
+            break;
+          case 'dns':
+            operationMessage = `🌐 Network cache cleared (DNS fallback)`;
+            break;
+        }
+        detailedMessages.push(operationMessage);
       } else {
         errorMessage = result.message;
       }
     });
     
     if (successCount === results.length) {
-      if (itemsCleared > 0) {
-        showSuccess(`Successfully cleared ${itemsCleared} item${itemsCleared !== 1 ? 's' : ''}`);
+      // Show detailed success message
+      if (detailedMessages.length > 0) {
+        const summary = detailedMessages.join(' • ');
+        showSuccess(summary);
       } else {
-        showMessage('No items found to clear');
+        showMessage('Operations completed - no items found to clear');
       }
     } else {
       showError(errorMessage || 'Error clearing some items');
