@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const clearCacheCheckbox = document.getElementById('clearCache');
   const clearHistoryCheckbox = document.getElementById('clearHistory');
   const flushDNSCheckbox = document.getElementById('flushDNS');
+  const clearLocalStorageCheckbox = document.getElementById('clearLocalStorage');
+  const clearIndexedDBCheckbox = document.getElementById('clearIndexedDB');
+  const clearCacheStorageCheckbox = document.getElementById('clearCacheStorage');
+  const clearServiceWorkersCheckbox = document.getElementById('clearServiceWorkers');
   
   // Setup options UI interaction
   setupOptionsUI();
@@ -43,6 +47,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (clearCacheCheckbox.checked) selectedOptions.push('Cache');
     if (clearHistoryCheckbox.checked) selectedOptions.push('History');
     if (flushDNSCheckbox.checked) selectedOptions.push('DNS');
+    if (clearLocalStorageCheckbox.checked) selectedOptions.push('Local Storage');
+    if (clearIndexedDBCheckbox.checked) selectedOptions.push('IndexedDB');
+    if (clearCacheStorageCheckbox.checked) selectedOptions.push('Cache Storage');
+    if (clearServiceWorkersCheckbox.checked) selectedOptions.push('Service Workers');
     
     const buttonTextElement = clearButton.querySelector('.button-text');
     
@@ -54,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
       buttonTextElement.textContent = `Clear ${selectedOptions[0]}`;
       clearButton.disabled = false;
       clearButton.classList.remove('disabled');
-    } else if (selectedOptions.length === 4) {
+    } else if (selectedOptions.length === 8) {
       buttonTextElement.textContent = 'Clear All Data';
       clearButton.disabled = false;
       clearButton.classList.remove('disabled');
@@ -78,6 +86,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearCache = clearCacheCheckbox.checked;
     const clearHistory = clearHistoryCheckbox.checked;
     const flushDNS = flushDNSCheckbox.checked;
+    const clearLocalStorage = clearLocalStorageCheckbox.checked;
+    const clearIndexedDB = clearIndexedDBCheckbox.checked;
+    const clearCacheStorage = clearCacheStorageCheckbox.checked;
+    const clearServiceWorkers = clearServiceWorkersCheckbox.checked;
     
     // Prepare tracking for completion
     let operationsCompleted = 0;
@@ -89,6 +101,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (clearCache) operationsTotal++;
     if (clearHistory) operationsTotal++;
     if (flushDNS) operationsTotal++;
+    if (clearLocalStorage) operationsTotal++;
+    if (clearIndexedDB) operationsTotal++;
+    if (clearCacheStorage) operationsTotal++;
+    if (clearServiceWorkers) operationsTotal++;
     
     if (operationsTotal === 0) {
       showMessage("Please select at least one item to clear");
@@ -102,6 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (clearCache) selectedItems.push('cache');
     if (clearHistory) selectedItems.push('history');
     if (flushDNS) selectedItems.push('network cache');
+    if (clearLocalStorage) selectedItems.push('local storage');
+    if (clearIndexedDB) selectedItems.push('indexedDB');
+    if (clearCacheStorage) selectedItems.push('cache storage');
+    if (clearServiceWorkers) selectedItems.push('service workers');
     
     showMessage(`🔄 Clearing ${selectedItems.join(', ')}...`);
     
@@ -132,6 +152,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // Flush DNS if selected
     if (flushDNS) {
       flushDNSCache(function(result) {
+        operationResults.push(result);
+        checkCompletion();
+      });
+    }
+
+    // Clear Local Storage if selected
+    if (clearLocalStorage) {
+      clearSiteLocalStorage(function(result) {
+        operationResults.push(result);
+        checkCompletion();
+      });
+    }
+
+    // Clear IndexedDB if selected
+    if (clearIndexedDB) {
+      clearSiteIndexedDB(function(result) {
+        operationResults.push(result);
+        checkCompletion();
+      });
+    }
+
+    // Clear Cache Storage if selected
+    if (clearCacheStorage) {
+      clearSiteCacheStorage(function(result) {
+        operationResults.push(result);
+        checkCompletion();
+      });
+    }
+
+    // Clear Service Workers if selected
+    if (clearServiceWorkers) {
+      clearSiteServiceWorkers(function(result) {
         operationResults.push(result);
         checkCompletion();
       });
@@ -266,6 +318,70 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
   }
+
+  // Clear Local Storage for current site
+  function clearSiteLocalStorage(callback) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (tabs.length === 0) {
+        callback({type: "localStorage", success: false, message: "No active tab found"});
+        return;
+      }
+      const url = tabs[0].url;
+      chrome.browsingData.remove({
+        origins: [new URL(url).origin]
+      }, { localStorage: true }, function() {
+        callback({ type: 'localStorage', success: true, message: 'Local storage cleared' });
+      });
+    });
+  }
+
+  // Clear IndexedDB for current site
+  function clearSiteIndexedDB(callback) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (tabs.length === 0) {
+        callback({type: "indexedDB", success: false, message: "No active tab found"});
+        return;
+      }
+      const url = tabs[0].url;
+      chrome.browsingData.remove({
+        origins: [new URL(url).origin]
+      }, { indexedDB: true }, function() {
+        callback({ type: 'indexedDB', success: true, message: 'IndexedDB cleared' });
+      });
+    });
+  }
+
+  // Clear Cache Storage (Service Worker cache) for current site
+  function clearSiteCacheStorage(callback) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (tabs.length === 0) {
+        callback({type: "cacheStorage", success: false, message: "No active tab found"});
+        return;
+      }
+      const url = tabs[0].url;
+      chrome.browsingData.remove({
+        origins: [new URL(url).origin]
+      }, { cacheStorage: true }, function() {
+        callback({ type: 'cacheStorage', success: true, message: 'Cache Storage cleared' });
+      });
+    });
+  }
+
+  // Clear Service Workers for current site
+  function clearSiteServiceWorkers(callback) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (tabs.length === 0) {
+        callback({type: "serviceWorkers", success: false, message: "No active tab found"});
+        return;
+      }
+      const url = tabs[0].url;
+      chrome.browsingData.remove({
+        origins: [new URL(url).origin]
+      }, { serviceWorkers: true }, function() {
+        callback({ type: 'serviceWorkers', success: true, message: 'Service Workers cleared' });
+      });
+    });
+  }
   
   // Show results after manual clearing
   function showResults(results) {
@@ -298,6 +414,18 @@ document.addEventListener('DOMContentLoaded', function() {
             break;
           case 'dns':
             operationMessage = `🌐 Network cache cleared (DNS fallback)`;
+            break;
+          case 'localStorage':
+            operationMessage = `📦 Local Storage cleared`;
+            break;
+          case 'indexedDB':
+            operationMessage = `🗄️ IndexedDB cleared`;
+            break;
+          case 'cacheStorage':
+            operationMessage = `🧰 Cache Storage cleared`;
+            break;
+          case 'serviceWorkers':
+            operationMessage = `🛠️ Service Workers cleared`;
             break;
         }
         detailedMessages.push(operationMessage);
