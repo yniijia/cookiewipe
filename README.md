@@ -70,4 +70,4 @@ Designed and developed with a focus on clean, minimal UI/UX principles that prom
 
 *"One click, zero crumbs."* 🍪
 
-Version 2.02.25 💙
+Version 2.03.0 💙

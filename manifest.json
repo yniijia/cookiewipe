@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CookieWipe",
-  "version": "2.02.25",
+  "version": "2.03.0",
   "description": "Clear your digital footprint with one click - premium cookie and cache management",
   "permissions": ["cookies", "tabs", "activeTab", "browsingData", "history"],
   "host_permissions": ["<all_urls>"],
