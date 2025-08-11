@@ -9,7 +9,7 @@ CookieWipe is a simple yet powerful Chrome extension that allows users to instan
 ## ✅ Features
 
 - **🔄 Single-Click Cookie Clearing**: Automatically clears cookies for the current site upon opening
-- **🧹 Multiple Data Management Options**: Clear cookies, cache, browsing history, and DNS cache
+- **🧹 Multiple Data Types**: Cookies, Cache, History, DNS cache (fallback), Local Storage, IndexedDB, Cache Storage, Service Workers
 - **🎨 Beautiful, Minimal UI**: Premium design with smooth animations
 - **👁️ Visual Feedback**: Clear success/error states with visual indicators
 - **📱 Responsive Design**: Optimized for different screen sizes and orientations
@@ -37,9 +37,22 @@ The UI design embraces a clean, minimal aesthetic with a focus on:
 
 1. Click the CookieWipe icon in your browser toolbar to open the popup
 2. Cookies for the current site will be automatically cleared 🍪✨
-3. Select additional data types to clear (Cache, History, DNS Cache)
-4. Click the "Clear Selected" button to remove the selected data types
+3. Select additional data types to clear (Cache, History, DNS Cache, Local Storage, IndexedDB, Cache Storage, Service Workers)
+4. Click the "Clear Selected Data" button (or "Clear All Data" when all are selected)
 5. View the status message for confirmation of successful clearing
+
+### Supported data types
+
+- Cookies (per current site)
+- Cache (global)
+- History (global)
+- DNS cache (fallback via clearing browser cache)
+- Local Storage (per current site)
+- IndexedDB (per current site)
+- Cache Storage (per current site)
+- Service Workers (per current site)
+
+Note: Cache and History are cleared globally by Chrome’s API. Cookies, Local Storage, IndexedDB, Cache Storage, and Service Workers are cleared for the active site only.
 
 ## 🔮 Future Enhancements
 

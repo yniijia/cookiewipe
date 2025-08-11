@@ -134,7 +134,7 @@ h1 {
   gap: 10px 12px;
 }
 
-/* Make long labels span full row to avoid awkward wrapping */
+/* Make last item span full width to avoid awkward wrapping on two lines */
 .option-group .checkbox-wrapper.wide {
   grid-column: 1 / -1;
 }
@@ -262,6 +262,7 @@ h1 {
   visibility: hidden;
   transition: var(--transition);
 }
+
 .action-button.clearing .button-loader {
   opacity: 1;
   visibility: visible;
@@ -348,17 +349,4 @@ button:focus, input:focus {
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
   }
-  
-  .checkbox-custom {
-    background-color: var(--border);
-  }
-
-  .checkbox-wrapper input[type="checkbox"]:checked + label .checkbox-custom::after {
-    border-color: var(--background);
-  }
-  
-  .action-button.disabled {
-    background-color: var(--border);
-    color: var(--text-tertiary);
-  }  
-}
+} 
