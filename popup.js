@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const clearIndexedDBCheckbox = document.getElementById('clearIndexedDB');
   const clearCacheStorageCheckbox = document.getElementById('clearCacheStorage');
   const clearServiceWorkersCheckbox = document.getElementById('clearServiceWorkers');
+  const quickCleanButton = document.getElementById('quickClean');
+  const deepCleanButton = document.getElementById('deepClean');
   
   // Setup options UI interaction
   setupOptionsUI();
@@ -71,6 +73,37 @@ document.addEventListener('DOMContentLoaded', function() {
       clearButton.disabled = false;
       clearButton.classList.remove('disabled');
     }
+  }
+
+  // Preset: Quick Clean (Cache + Cache Storage + Service Workers)
+  quickCleanButton?.addEventListener('click', function() {
+    setAllCheckboxes(false);
+    clearCacheCheckbox.checked = true;
+    clearCacheStorageCheckbox.checked = true;
+    clearServiceWorkersCheckbox.checked = true;
+    updateClearButtonState();
+    clearButton.click();
+  });
+
+  // Preset: Deep Clean (select everything)
+  deepCleanButton?.addEventListener('click', function() {
+    setAllCheckboxes(true);
+    updateClearButtonState();
+    clearButton.click();
+  });
+
+  function setAllCheckboxes(checked) {
+    const checkboxes = [
+      clearCookiesCheckbox,
+      clearCacheCheckbox,
+      clearHistoryCheckbox,
+      flushDNSCheckbox,
+      clearLocalStorageCheckbox,
+      clearIndexedDBCheckbox,
+      clearCacheStorageCheckbox,
+      clearServiceWorkersCheckbox,
+    ];
+    checkboxes.forEach(cb => { if (cb) cb.checked = checked; });
   }
   
   // Clear button for additional options

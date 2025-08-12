@@ -127,6 +127,40 @@ h1 {
   gap: 20px;
 }
 
+/* Preset buttons */
+.preset-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.preset-button {
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.preset-button:hover {
+  border-color: var(--primary);
+  background: var(--primary-lighter);
+}
+
+.preset-button.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.preset-button.primary:hover {
+  background: #4A5FCC;
+}
+
 /* Checkbox styles */
 .option-group {
   display: grid;
